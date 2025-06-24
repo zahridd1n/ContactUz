@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <section class="section">
+<div class="row">
+  <div class="col-12">
+    <div class="card p-4 shadow-sm">
+      <form method="GET" action="{% url 'set_user_region' %}">
+        <div class="form-row align-items-end">
+          <!-- Viloyat -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="region" class="font-weight-bold">Viloyat:</label>
+            <select name="region" id="region-select" class="form-control">
+              <option value="">-- Barchasi --</option>
+              {% for region in regions %}
+                <option value="{{ region.id }}"
+                        {% if user_region and user_region.region.id == region.id %}selected{% endif %}>
+                  {{ region.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tuman -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="district" class="font-weight-bold">Tuman/Shahar:</label>
+            <select name="district" id="district-select" class="form-control">
+              <option value="">-- Ixtiyoriy --</option>
+              {% for district in districts %}
+                <option value="{{ district.id }}"
+                        data-region="{{ district.region.id }}"
+                        {% if user_region and user_region.district and user_region.district.id == district.id %}selected{% endif %}>
+                  {{ district.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tugma -->
+          <div class="form-group col-md-2 col-sm-12">
+            <label class="d-none d-md-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary btn-block w-100">
+              <i class="fas fa-filter mr-1"></i> Filtrlash
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Businesses cards -->
+        <div class="row">
+            {% for b in businesses %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card  h-100">
+                    <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">{{ b.name }}</h5>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger"></i> <strong>Viloyat:</strong> {{ b.region }}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin text-info"></i> <strong>Tuman:</strong> {{ b.district }}</p>
+                        <p class="mb-1"><i class="fas fa-location-arrow text-success"></i> <strong>Manzil:</strong> {{ b.address }}</p>
+                    </div>
+
+                 <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted font-14">📞 Telefon:</span><br>
+                        <strong id="phone-{{ b.id }}" class="text-success copy-phone" style="cursor: pointer;" title="Nusxalash uchun bosing">
+                            +998{{ b.phone }}
+                        </strong>
+                    </div>
+                    <a href="tel:+998{{ b.phone }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-phone"></i> Terish
+                    </a>
+                </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<!-- Script: Dynamic filtering of districts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const regionSelect = document.getElementById('region-select');
+        const districtSelect = document.getElementById('district-select');
+
+        function filterDistricts() {
+            const selectedRegion = regionSelect.value;
+
+            Array.from(districtSelect.options).forEach(option => {
+                const regionId = option.getAttribute('data-region');
+                if (!regionId || regionId === selectedRegion || option.value === "") {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        // Initially filter on load
+        filterDistricts();
+
+        // Re-filter when region changes
+        regionSelect.addEventListener('change', filterDistricts);
+    });
+</script>
+
+
+
+{% endblock %}
